@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel Test - FarWay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Carousel Styles */
+        .product-carousel-main {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            border: 2px solid #f0f0f0;
+            border-radius: 1rem;
+        }
+        
+        .product-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateX(100%) scale(0.9);
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .product-slide.active {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+        
+        .product-slide.prev {
+            transform: translateX(-100%) scale(0.9);
+        }
+        
+        .carousel-dot {
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-dot.active {
+            background: rgba(59, 130, 246, 0.8) !important;
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Carousel Test</h1>
+        
+        <!-- Carousel Container -->
+        <div class="product-carousel-main relative mb-6" id="productCarousel">
+            <!-- Slide 1 -->
+            <div class="product-slide active bg-blue-200 text-blue-800">
+                SLIDE 1 - BEVERAGES
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="product-slide bg-purple-200 text-purple-800">
+                SLIDE 2 - BEAUTY
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="product-slide bg-green-200 text-green-800">
+                SLIDE 3 - PERSONAL CARE
+            </div>
+        </div>
+        
+        <!-- Navigation Dots -->
+        <div class="flex justify-center space-x-3 mb-6">
+            <button class="carousel-dot active w-4 h-4 rounded-full bg-gray-400 hover:bg-gray-600 transition-all duration-300" data-slide="0"></button>
+            <button class="carousel-dot w-4 h-4 rounded-full bg-gray-400 hover:bg-gray-600 transition-all duration-300" data-slide="1"></button>
+            <button class="carousel-dot w-4 h-4 rounded-full bg-gray-400 hover:bg-gray-600 transition-all duration-300" data-slide="2"></button>
+        </div>
+        
+        <!-- Manual Controls -->
+        <div class="text-center space-x-4 mb-6">
+            <button id="prevBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Previous</button>
+            <button id="nextBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
+            <button id="pauseBtn" class="bg-red-500 text-white px-4 py-2 rounded">Pause</button>
+            <button id="resumeBtn" class="bg-green-500 text-white px-4 py-2 rounded">Resume</button>
+        </div>
+        
+        <!-- Debug Info -->
+        <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-bold mb-2">Debug Info:</h3>
+            <div id="debugInfo" class="text-sm font-mono"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Carousel Test Started');
+            
+            const carousel = document.getElementById('productCarousel');
+            const slides = document.querySelectorAll('.product-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            const debugInfo = document.getElementById('debugInfo');
+            
+            let currentSlide = 0;
+            let carouselInterval;
+            let isRunning = false;
+            
+            // Debug function
+            function updateDebugInfo() {
+                debugInfo.innerHTML = `
+                    Current Slide: ${currentSlide}<br>
+                    Total Slides: ${slides.length}<br>
+                    Active Slides: ${document.querySelectorAll('.product-slide.active').length}<br>
+                    Active Dots: ${document.querySelectorAll('.carousel-dot.active').length}<br>
+                    Auto-running: ${isRunning}
+                `;
+            }
+            
+            // Show slide function
+            function showSlide(index) {
+                console.log('📽️ Showing slide:', index);
+                
+                // Clear all active states
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active', 'prev');
+                });
+                dots.forEach(dot => {
+                    dot.classList.remove('active');
+                });
+                
+                // Set active slide and dot
+                if (slides[index]) {
+                    slides[index].classList.add('active');
+                }
+                if (dots[index]) {
+                    dots[index].classList.add('active');
+                }
+                
+                updateDebugInfo();
+            }
+            
+            // Auto advance function
+            function autoAdvance() {
+                currentSlide = (currentSlide + 1) % slides.length;
+                console.log('🔄 Auto-advancing to slide:', currentSlide);
+                showSlide(currentSlide);
+            }
+            
+            // Start auto-advance
+            function startCarousel() {
+                if (carouselInterval) clearInterval(carouselInterval);
+                carouselInterval = setInterval(autoAdvance, 3000);
+                isRunning = true;
+                updateDebugInfo();
+                console.log('▶️ Carousel started');
+            }
+            
+            // Stop auto-advance
+            function stopCarousel() {
+                if (carouselInterval) clearInterval(carouselInterval);
+                isRunning = false;
+                updateDebugInfo();
+                console.log('⏸️ Carousel stopped');
+            }
+            
+            // Initialize
+            showSlide(0);
+            updateDebugInfo();
+            
+            // Dot navigation
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('🎯 Dot clicked:', index);
+                    currentSlide = index;
+                    showSlide(currentSlide);
+                    
+                    // Restart auto-advance
+                    startCarousel();
+                });
+            });
+            
+            // Manual controls
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                showSlide(currentSlide);
+            });
+            
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            });
+            
+            document.getElementById('pauseBtn').addEventListener('click', stopCarousel);
+            document.getElementById('resumeBtn').addEventListener('click', startCarousel);
+            
+            // Hover pause/resume
+            carousel.addEventListener('mouseenter', stopCarousel);
+            carousel.addEventListener('mouseleave', startCarousel);
+            
+            // Start the carousel
+            startCarousel();
+            
+            console.log('✅ Carousel test initialized successfully!');
+        });
+    </script>
+</body>
+</html>
