@@ -1,0 +1,66 @@
+{
+  "name": "farway-website",
+  "type": "compose",
+  "description": "FarWay Company - Global FMCG Distribution Excellence",
+  "version": "1.0.0",
+  "compose": {
+    "file": "docker-compose.yml",
+    "context": "."
+  },
+  "domains": [
+    {
+      "host": "farway.quantumtaskai.com",
+      "https": true,
+      "certificateType": "letsencrypt"
+    }
+  ],
+  "environment": {
+    "NODE_ENV": "production"
+  },
+  "resources": {
+    "memory": "512M",
+    "cpu": "0.5"
+  },
+  "healthcheck": {
+    "enabled": true,
+    "path": "/",
+    "interval": 30,
+    "timeout": 10,
+    "retries": 3
+  },
+  "backup": {
+    "enabled": false
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": ["cpu", "memory", "network"]
+  },
+  "security": {
+    "firewall": {
+      "enabled": true,
+      "rules": [
+        {
+          "port": 80,
+          "protocol": "tcp",
+          "source": "0.0.0.0/0"
+        },
+        {
+          "port": 443,
+          "protocol": "tcp",
+          "source": "0.0.0.0/0"
+        }
+      ]
+    }
+  },
+  "deployment": {
+    "strategy": "rolling",
+    "maxUnavailable": 0,
+    "maxSurge": 1
+  },
+  "tags": [
+    "fmcg",
+    "distribution",
+    "static-website",
+    "nginx"
+  ]
+}
